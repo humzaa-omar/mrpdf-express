@@ -1,0 +1,58 @@
+{
+  "name": "mrpdf-express",
+  "version": "1.0.0",
+  "description": "Generate pdf from document on the web",
+  "main": "lib/index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prepare": "tsc",
+    "lint": "eslint \"*/**/*.{js,ts}\"",
+    "lintfix": "eslint \"*/**/*.{js,ts}\" --fix"
+  },
+  "keywords": [
+    "pdf",
+    "docusaurus",
+    "vuepress",
+    "mkdocs",
+    "gitbook"
+  ],
+  "homepage": "https://github.com/humzaa-omar/mrpdf-express",
+  "author": "Humzaa Omar",
+  "license": "MIT",
+  "dependencies": {
+    "boxen": "^5.0.1",
+    "chalk": "^3.0.0",
+    "express": "^4.17.1",
+    "puppeteer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.1",
+    "@types/express": "^4.17.13",
+    "@types/node": "^15.14.7",
+    "@types/puppeteer": "^2.1.6",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.10"
+  },
+  "files": [
+    "lib/**/*",
+    "bin/**/*"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "./node_modules/.bin/eslint --fix"
+    ]
+  }
+}

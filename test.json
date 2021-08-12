@@ -1,0 +1,8 @@
+{
+  "initialDocURLs": "https://docusaurus.io/docs",
+  "contentSelecter": "article",
+  "paginationSelector": ".pagination-nav__item--next > a",
+  "excludeSelectors": ".margin-vert--xl a",
+  "coverImage": "https://docusaurus.io/img/docusaurus.png",
+  "coverTitle": "Docusaurus v2"
+}
