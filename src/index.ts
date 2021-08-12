@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+process.env.NODE_ENV = 'production';
 import express from 'express';
 import chalk from 'chalk';
 import boxen from 'boxen';
@@ -32,23 +33,27 @@ app.get('/api/v1', function (req, res) {
     coverTitle: req.query.coverTitle,
     coverImage: req.query.coverImage,
   };
-  generatePDF(options).then((pdf) => {
-    console.log(chalk.red('\nEND'));
-    const filename = req.body.outputPDFFilename
-      ? req.body.outputPDFFilename
-      : 'mrPDF_Express.pdf';
-    const download = req.query.dl ? 'attachment' : 'inline';
-    res.writeHead(200, {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `${download}; filename=${filename}`,
-      'Content-Length': Buffer.byteLength(pdf),
+  generatePDF(options)
+    .then((pdf) => {
+      const filename = req.body.outputPDFFilename
+        ? req.body.outputPDFFilename
+        : 'mrPDF_Express.pdf';
+      const download = req.query.dl ? 'attachment' : 'inline';
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `${download}; filename=${filename}`,
+        'Content-Length': Buffer.byteLength(pdf),
+      });
+      res.end(pdf);
+    })
+    .catch((err: { stack: any }) => {
+      console.error(chalk.red(err.stack));
+      res.send(err.stack);
     });
-    res.end(pdf);
-  });
 });
 
 app.post('/api/v1/', function (req, res) {
-  const options: generatePDFOptions = {
+  const options: generatePDFOptions | any = {
     initialDocURLs: commaSeparatedList(req.body.initialDocURLs),
     excludeURLs: commaSeparatedList(req.body.excludeURLs),
     contentSelector: req.body.contentSelector,
@@ -64,15 +69,19 @@ app.post('/api/v1/', function (req, res) {
   const filename = req.body.outputPDFFilename
     ? req.body.outputPDFFilename
     : 'mrPDF_Express.pdf';
-  generatePDF(options).then((pdf) => {
-    console.log(chalk.red('\nEND'));
-    res.writeHead(200, {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=${filename}`,
-      'Content-Length': Buffer.byteLength(pdf),
+  generatePDF(options)
+    .then((pdf) => {
+      res.writeHead(200, {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename=${filename}`,
+        'Content-Length': Buffer.byteLength(pdf),
+      });
+      res.end(pdf);
+    })
+    .catch((err: { stack: any }) => {
+      console.error(chalk.red(err.stack));
+      res.send(err.stack);
     });
-    res.end(pdf);
-  });
 });
 
 app.listen(port, () => {

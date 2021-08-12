@@ -1,20 +1,22 @@
 import chalk = require('chalk');
 import puppeteer = require('puppeteer');
+const dev = true;
 
 let contentHTML = '';
 export interface generatePDFOptions {
-  initialDocURLs: Array<string>; // required
-  excludeURLs?: Array<string>;
-  outputPDFFilename?: string; // required
-  pdfMargin?: puppeteer.PDFOptions['margin'];
-  contentSelector: string; //required
-  paginationSelector: string; //required
-  pdfFormat?: puppeteer.PDFFormat;
-  excludeSelectors?: Array<string>;
-  cssStyle?: string;
-  puppeteerArgs?: Array<string>;
-  coverTitle?: string;
-  coverImage?: string;
+  initialDocURLs: Array<string>;
+  excludeURLs: Array<string>;
+  outputPDFFilename: string;
+  pdfMargin: puppeteer.PDFOptions['margin'];
+  contentSelector: string;
+  paginationSelector: string;
+  pdfFormat: puppeteer.PDFFormat;
+  excludeSelectors: Array<string>;
+  cssStyle: string;
+  puppeteerArgs: Array<string>;
+  coverTitle: string;
+  coverImage: string;
+  loadMethod: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
 }
 
 export async function generatePDF({
@@ -30,6 +32,7 @@ export async function generatePDF({
   puppeteerArgs,
   coverTitle,
   coverImage,
+  loadMethod = 'domcontentloaded',
 }: generatePDFOptions): Promise<any> {
   const browser = await puppeteer.launch({ args: puppeteerArgs });
   const page = await browser.newPage();
@@ -39,11 +42,15 @@ export async function generatePDF({
 
     // Create a list of HTML for the content section of all pages by looping
     while (nextPageURL) {
-      console.log(chalk.cyan(`GET: ${nextPageURL.toUpperCase()}`));
+      if (dev) {
+        console.log();
+        console.log(chalk.cyan(`Retrieving html from ${nextPageURL}`));
+        console.log();
+      }
 
       // Go to the page specified by nextPageURL
       await page.goto(`${nextPageURL}`, {
-        waitUntil: 'networkidle0',
+        waitUntil: loadMethod,
         timeout: 0,
       });
       // Get the HTML string of the content section.
@@ -72,10 +79,10 @@ export async function generatePDF({
 
       // Make joined content html
       if (excludeURLs && excludeURLs.includes(nextPageURL)) {
-        console.log(chalk.green('This URL is excluded.'));
+        if (dev) console.log(chalk.green('This URL is excluded.'));
       } else {
         contentHTML += html;
-        console.log(chalk.green('BREAK'));
+        if (dev) console.log(chalk.green('Success'));
       }
 
       // Find next page url before DOM operations
@@ -99,7 +106,7 @@ export async function generatePDF({
   }
 
   // Go to initial page
-  await page.goto(`${initialDocURLs[0]}`, { waitUntil: 'networkidle0' });
+  await page.goto(`${initialDocURLs[0]}`, { waitUntil: loadMethod });
 
   const coverHTML = `
   <div
@@ -161,14 +168,12 @@ export async function generatePDF({
     await page.addStyleTag({ content: cssStyle });
   }
 
-  // TODO: Return PDF
-  const genPDF = await page.pdf({
+  const PDF = await page.pdf({
     format: pdfFormat,
     printBackground: true,
     margin: pdfMargin,
   });
-
-  return genPDF;
+  return PDF;
 }
 
 function generateToc(contentHtml: string) {
