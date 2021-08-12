@@ -13,7 +13,6 @@ export interface generatePDFOptions {
   pdfFormat: puppeteer.PDFFormat;
   excludeSelectors: Array<string>;
   cssStyle: string;
-  puppeteerArgs: Array<string>;
   coverTitle: string;
   coverImage: string;
   loadMethod: 'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2';
@@ -29,12 +28,13 @@ export async function generatePDF({
   pdfFormat,
   excludeSelectors,
   cssStyle,
-  puppeteerArgs,
   coverTitle,
   coverImage,
   loadMethod = 'domcontentloaded',
 }: generatePDFOptions): Promise<any> {
-  const browser = await puppeteer.launch({ args: puppeteerArgs });
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
 
   for (const url of initialDocURLs) {
